@@ -120,6 +120,10 @@ class MmapLimiter {
     MutexLock l(&mu_);
     SetAllowed(GetAllowed() + 1);
   }
+  // REQUIRES: mu_ must be held
+  void SetAllowed(intptr_t v) {
+    allowed_.Release_Store(reinterpret_cast<void*>(v));
+  }
 
  private:
   port::Mutex mu_;
@@ -129,10 +133,6 @@ class MmapLimiter {
     return reinterpret_cast<intptr_t>(allowed_.Acquire_Load());
   }
 
-  // REQUIRES: mu_ must be held
-  void SetAllowed(intptr_t v) {
-    allowed_.Release_Store(reinterpret_cast<void*>(v));
-  }
 
   MmapLimiter(const MmapLimiter&);
   void operator=(const MmapLimiter&);
@@ -295,6 +295,10 @@ class PosixEnv : public Env {
     char msg[] = "Destroying Env::Default()\n";
     fwrite(msg, 1, sizeof(msg), stderr);
     abort();
+  }
+  virtual Status SetMaxMmapSize(const int mmap_max_size){
+    mmap_limit_.SetAllowed(mmap_max_size);
+    return Status::OK();
   }
 
   virtual Status NewSequentialFile(const std::string& fname,
