@@ -1444,8 +1444,9 @@ DB::~DB() { }
 
 Status DB::Open(const Options& options, const std::string& dbname,
                 DB** dbptr) {
+  if(options.target_file_size >0)
+    SetTargetFileSize(options.target_file_size);
   *dbptr = NULL;
-
   DBImpl* impl = new DBImpl(options, dbname);
   impl->mutex_.Lock();
   VersionEdit edit;

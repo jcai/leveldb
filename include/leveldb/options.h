@@ -135,6 +135,9 @@ struct Options {
   // Default: NULL
   const FilterPolicy* filter_policy;
 
+  //文件大小,默认2M
+  int target_file_size;
+
   // Create an Options object with default values for all fields.
   Options();
 };
